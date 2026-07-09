@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Radix Base Converter Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            /* Base Colors */
+            --brand: #38bdf8;
+            --bin-color: #4ade80;
+            --oct-color: #fbbf24;
+            --hex-color: #c084fc;
+            --dec-color: #f43f5e;
+            --error-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.6s ease-out;
+            margin-bottom: 24px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper.invalid-input {
+            border-color: var(--error-color);
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+
+        select {
+            appearance: none;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--brand);
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            padding: 0 12px;
+        }
+
+        input::placeholder {
+            color: #475569;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-left: 8px;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .results-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        .result-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .result-card:hover {
+            transform: translateX(4px);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .result-info {
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+
+        .result-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .result-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            word-break: break-all;
+            color: #e2e8f0;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card-dec { border-left: 4px solid var(--dec-color); }
+        .card-dec .result-label { color: var(--dec-color); }
+        .card-bin { border-left: 4px solid var(--bin-color); }
+        .card-bin .result-label { color: var(--bin-color); }
+        .card-oct { border-left: 4px solid var(--oct-color); }
+        .card-oct .result-label { color: var(--oct-color); }
+        .card-hex { border-left: 4px solid var(--hex-color); }
+        .card-hex .result-label { color: var(--hex-color); }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        footer {
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        footer a {
+            color: var(--brand);
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover {
+            color: #818cf8;
+        }
+
+        footer a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: #818cf8;
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        footer a:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Radix Pro Converter</h1>
+        <p>Real-time base converter with precision fraction support</p>
+    </header>
+
+    <div class="input-wrapper" id="inputWrapper">
+        <select id="fromBase" onchange="onBaseChange()">
+            <option value="10">DEC (10)</option>
+            <option value="2">BIN (2)</option>
+            <option value="8">OCT (8)</option>
+            <option value="16">HEX (16)</option>
+        </select>
+        <div class="input-container">
+            <input type="text" id="mainInput" placeholder="Enter Base-10 value..." autocomplete="off" spellcheck="false" oninput="liveConvert()">
+        </div>
+    </div>
+    <div class="error-message" id="errorMsg">⚠️ Invalid characters for the selected base!</div>
+
+    <div class="results-grid">
+        <div class="result-card card-dec">
+            <div class="result-info">
+                <div class="result-label">Decimal</div>
+                <div class="result-value" id="outDec">0</div>
+            </div>
+            <button class="copy-btn" onclick="copyText('outDec')">
+                <svg><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+        </div>
+        <div class="result-card card-bin">
+            <div class="result-info">
+                <div class="result-label">Binary</div>
+                <div class="result-value" id="outBin">0</div>
+            </div>
+            <button class="copy-btn" onclick="copyText('outBin')">
+                <svg><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+        </div>
+        <div class="result-card card-oct">
+            <div class="result-info">
+                <div class="result-label">Octal</div>
+                <div class="result-value" id="outOct">0</div>
+            </div>
+            <button class="copy-btn" onclick="copyText('outOct')">
+                <svg><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+        </div>
+        <div class="result-card card-hex">
+            <div class="result-info">
+                <div class="result-label">Hexadecimal</div>
+                <div class="result-value" id="outHex">0</div>
+            </div>
+            <button class="copy-btn" onclick="copyText('outHex')">
+                <svg><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    Made by <a href="https://www.shahkamalsajid.me" target="_blank" rel="noopener noreferrer">SAJID</a>
+</footer>
+
+<div id="toast" class="toast">Copied to clipboard!</div> 
+
+<script>
+    // Keyboard level filter for active typing
+    document.getElementById('mainInput').addEventListener('keydown', function(e) {
+        const fromBase = parseInt(document.getElementById('fromBase').value);
+        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Control', 'a', 'c', 'v', 'x'];
+        
+        if (allowedKeys.includes(e.key) || (e.ctrlKey || e.metaKey)) return;
+
+        let regex = getRegexForBase(fromBase);
+
+        if (!regex.test(e.key)) {
+            e.preventDefault();
+        }
+
+        if (e.key === '.' && this.value.includes('.')) {
+            e.preventDefault();
+        }
+    });
+
+    function getRegexForBase(base) {
+        if (base === 2) return /[01.]/;
+        if (base === 8) return /[0-7.]/;
+        if (base === 10) return /[0-9.]/;
+        if (base === 16) return /[0-9A-Fa-f.]/;
+        return /.*/;
+    }
+
+    function getFullValidationRegex(base) {
+        if (base === 2) return /^[01]+(\.[01]+)?$/;
+        if (base === 8) return /^[0-7]+(\.[0-7]+)?$/;
+        if (base === 10) return /^[0-9]+(\.[0-9]+)?$/;
+        if (base === 16) return /^[0-9A-F]+(\.[0-9A-F]+)?$/;
+        return /.*/;
+    }
+
+    function onBaseChange() {
+        const fromBase = document.getElementById('fromBase').value;
+        document.getElementById('mainInput').placeholder = `Enter Base-${fromBase} value...`;
+        // Recalculate or validate text with the newly selected base without deleting
+        liveConvert(); 
+    }
+
+    function clearResults() {
+        ['outDec', 'outBin', 'outOct', 'outHex'].forEach(id => {
+            document.getElementById(id).innerText = '0';
+        });
+    }
+
+    function liveConvert() {
+        let rawInput = document.getElementById('mainInput').value.trim().toUpperCase();
+        const fromBase = parseInt(document.getElementById('fromBase').value);
+        const wrapper = document.getElementById('inputWrapper');
+        const errorMsg = document.getElementById('errorMsg');
+
+        if (!rawInput || rawInput === '.') {
+            clearResults();
+            wrapper.classList.remove('invalid-input');
+            errorMsg.style.display = 'none';
+            return;
+        }
+
+        // Complete input text string check for newly selected base
+        const fullRegex = getFullValidationRegex(fromBase);
+        if (!fullRegex.test(rawInput)) {
+            clearResults();
+            wrapper.classList.add('invalid-input');
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        // Input is valid, clear error styling
+        wrapper.classList.remove('invalid-input');
+        errorMsg.style.display = 'none';
+
+        try {
+            let decimalValue = 0;
+            if (rawInput.includes('.')) {
+                const parts = rawInput.split('.');
+                const integerPart = parseInt(parts[0] || '0', fromBase);
+                
+                let fractionalPart = 0;
+                const fracStr = parts[1] || '';
+                for (let i = 0; i < fracStr.length; i++) {
+                    const digit = parseInt(fracStr[i], fromBase);
+                    if (!isNaN(digit)) {
+                        fractionalPart += digit * Math.pow(fromBase, -(i + 1));
+                    }
+                }
+                decimalValue = integerPart + fractionalPart;
+            } else {
+                decimalValue = parseInt(rawInput, fromBase);
+            }
+
+            if (isNaN(decimalValue)) return;
+
+            document.getElementById('outDec').innerText = formatResult(decimalValue, 10);
+            document.getElementById('outBin').innerText = formatResult(decimalValue, 2);
+            document.getElementById('outOct').innerText = formatResult(decimalValue, 8);
+            document.getElementById('outHex').innerText = formatResult(decimalValue, 16);
+
+        } catch (err) {
+            clearResults();
+        }
+    }
+
+    function formatResult(decimalNum, toBase) {
+        const integerPart = Math.floor(decimalNum);
+        let resultStr = integerPart.toString(toBase).toUpperCase();
+
+        let fractionalPart = decimalNum - integerPart;
+        fractionalPart = Math.round(fractionalPart * 1e10) / 1e10; 
+
+        if (fractionalPart > 0) {
+            resultStr += '.';
+            let precision = 10; 
+            while (fractionalPart > 0 && precision > 0) {
+                fractionalPart *= toBase;
+                const digit = Math.floor(fractionalPart);
+                resultStr += digit.toString(toBase).toUpperCase();
+                fractionalPart -= digit;
+                fractionalPart = Math.round(fractionalPart * 1e10) / 1e10;
+                precision--;
+            }
+        }
+        return resultStr;
+    }
+
+    function copyText(elementId) {
+        const textToCopy = document.getElementById(elementId).innerText;
+        if (textToCopy === '0' && document.getElementById('mainInput').value === '') return;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        });
+    }
+</script>
+
+</body>
+  </html>
+    
